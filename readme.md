@@ -26,6 +26,21 @@ $ clone the repo and cd into it
 $ mv .env-example .env && source .env
 $ docker-compose up --build
 ```
+### Test
+
+```sh
+$ npm run test
+```
+
+### Coverage
+
+```sh
+$ npm run coverage
+```
+
+Screenshot
+![alt text](coverage.png)
+
 ### Assumptions
   - The RDF folder will alway contain a epub folder.
   - The epub folder contains a list of folders with number as file names, containing the RDF file.

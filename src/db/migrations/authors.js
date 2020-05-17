@@ -8,6 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      a_id: {
+        type: Sequelize.UUID,
+        allowNull: false
+      },
       name: {
         type: Sequelize.STRING,
         allowNull: true
@@ -30,7 +34,7 @@ module.exports = {
       }
     });
   },
-  down(queryInterface, Sequelize) {
+  down(queryInterface) {
     return queryInterface.dropTable('authors');
   }
 };

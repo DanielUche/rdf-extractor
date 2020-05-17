@@ -8,6 +8,10 @@ const Author = sequelize.define('author', {
     primaryKey: true,
     type: Sequelize.INTEGER
   },
+  a_id: {
+    type: Sequelize.UUID,
+    allowNull: false
+  },
   name: {
     type: Sequelize.STRING,
     allowNull: true

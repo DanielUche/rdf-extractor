@@ -21,7 +21,7 @@ const Book = sequelize.define('book', {
     allowNull: true
   },
   authors_id: {
-    type: Sequelize.ARRAY(Sequelize.INTEGER),
+    type: Sequelize.ARRAY(Sequelize.UUID),
     allowNull: true
   },
   publication_date: {

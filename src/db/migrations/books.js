@@ -21,7 +21,7 @@ module.exports = {
         allowNull: true
       },
       authors_id: {
-        type: Sequelize.ARRAY(Sequelize.INTEGER),
+        type: Sequelize.ARRAY(Sequelize.UUID),
         allowNull: true
       },
       publication_date: {
@@ -46,7 +46,7 @@ module.exports = {
       }
     });
   },
-  down(queryInterface, Sequelize) {
+  down(queryInterface) {
     return queryInterface.dropTable('books');
   }
 };

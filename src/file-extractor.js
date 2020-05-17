@@ -1,3 +1,4 @@
+const uuid = require('uuid');
 const { promises: fs } = require('fs');
 const path = require('path');
 const xml2js = require('xml2js');
@@ -57,7 +58,6 @@ const extractRdfData = async (data) => {
     subjectArray.push(sub['rdf:Description'][0]['rdf:value'][0]);
   });
 
-  const authorsId = [];
   if (!authors || authors.length === 0) {
     authors = [];
   }
@@ -68,27 +68,50 @@ const extractRdfData = async (data) => {
     publicationDate,
     publisher,
     language,
-    title,
-    authorsId
+    title
   };
 };
 
+let fetchedAuthors = false;
+let authorMap;
+const getPublishedAuthorNames = async () => {
+  const authors = await Author.findAll({ attributes: ['name'], raw: true });
+  fetchedAuthors = true;
+  authorMap = new Set(authors.map((author) => author.name));
+  return 0;
+};
+
+let bookArr = [];
+let authorsArr = [];
+let ingestedArr = [];
 const writeToDB = async (record, folder) => {
   const {
     authors, publisher,
     title, rights,
-    subjectArray, authorsId,
+    subjectArray,
     publicationDate, language
   } = record;
+  const authorsId = [];
+
+  if (!fetchedAuthors) {
+    await getPublishedAuthorNames(); // Only Make database call when set is empty
+  }
 
   for (let i = 0; i < authors.length; i += 1) {
     const author = getAuthor(authors[i]);
-    let authCreated = await Author.findOrCreate({ where: { name: author.name }, defults: author });
-    authCreated = await authCreated[0].get({ plain: true });
-    authorsId.push(authCreated.id);
+    author.a_id = uuid.v4();
+    if (!authorMap.has(author.name)) {
+      authorMap.add(author.name);
+      authorsArr.push(author);
+      authorsId.push(author.a_id);
+    }
+    // let authCreated = await Author.
+    // findOrCreate({ where: { name: author.name }, defults: author });
+    // authCreated = await authCreated[0].get({ plain: true });
+    // authorsId.push(authCreated.id);
   }
 
-  await Book.create({
+  bookArr.push({
     publisher,
     language,
     title,
@@ -97,9 +120,29 @@ const writeToDB = async (record, folder) => {
     authors_id: authorsId,
     publication_date: publicationDate
   });
-  await Ingested.create({
-    record: folder
-  });
+
+  ingestedArr.push({ record: folder });
+
+  if (bookArr.length === 1000) {
+    // Bulk write to database 1000 records
+    await Author.bulkCreate(authorsArr);
+    await Book.bulkCreate(bookArr);
+    await Ingested.bulkCreate(ingestedArr);
+    bookArr = []; ingestedArr = []; authorsArr = [];
+  }
+
+  // await Book.create({
+  // publisher,
+  // language,
+  // title,
+  // licence: rights,
+  // subjects: subjectArray,
+  // authors_id: authorsId,
+  // publication_date: publicationDate
+  // });
+  // await Ingested.create({
+  //   record: folder
+  // });
   return true;
 };
 
@@ -135,6 +178,9 @@ const fileReader = async () => {
         }
       }
     }
+    // Bulk write to database 1000 or less records
+    if (authorsArr.length) await Author.bulkCreate(authorsArr);
+    if (bookArr.length) await Book.bulkCreate(bookArr);
     await dropIngestedData(); // Clear Ingest table when all record is ingestesd
   }
   catch (error) {
@@ -151,5 +197,6 @@ module.exports = {
   extractRdfData,
   writeToDB,
   parseRDF,
-  dropIngestedData
+  dropIngestedData,
+  getPublishedAuthorNames
 };

@@ -105,10 +105,6 @@ const writeToDB = async (record, folder) => {
       authorsArr.push(author);
       authorsId.push(author.a_id);
     }
-    // let authCreated = await Author.
-    // findOrCreate({ where: { name: author.name }, defults: author });
-    // authCreated = await authCreated[0].get({ plain: true });
-    // authorsId.push(authCreated.id);
   }
 
   bookArr.push({
@@ -130,19 +126,6 @@ const writeToDB = async (record, folder) => {
     await Ingested.bulkCreate(ingestedArr);
     bookArr = []; ingestedArr = []; authorsArr = [];
   }
-
-  // await Book.create({
-  // publisher,
-  // language,
-  // title,
-  // licence: rights,
-  // subjects: subjectArray,
-  // authors_id: authorsId,
-  // publication_date: publicationDate
-  // });
-  // await Ingested.create({
-  //   record: folder
-  // });
   return true;
 };
 

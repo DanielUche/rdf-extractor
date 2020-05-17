@@ -19,7 +19,7 @@ describe('Test Extractor Utility', () => {
     const temp = { ...parsedData };
     delete temp['rdf:RDF']['pgterms:ebook'][0]['dcterms:creator'];
     const extracted = await Util.extractRdfData(temp);
-    expect(extracted).to.have.property('authorsId');
+    expect(extracted).to.have.property('authors');
   });
 
   it('Should successfully Read RDF files and save to database', async () => {
